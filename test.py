@@ -13,9 +13,11 @@ class Predict(object):
 	def predict(self, image_path):
 		img = Image.open(image_path).convent('L')
 		img = np.reshape(img, (28, 28, 1)) / 255.
-		x = np.array([1-img])
-		y = self.cnn.model.predict(x)
-		print('      -> Predict digit', np.argmax(y[0]))
+		self.predict_img(img)
 
 	def predict_img(self, image):
-		
+		x = np.array([1-image])
+		y = self.cnn.model.predict(x)
+		predict_result = np.argmax(y[0])
+		print('      -> Predict digit', predict_result)
+		return predict_result
