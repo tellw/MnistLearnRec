@@ -1,10 +1,11 @@
 from PyQt5.QtWidgets import QMainWindow, QWidget, QPushButton, QLabel, QHBoxLayout, QApplication, QVBoxLayout
-from PyQt5.QtGui import QColor, QPainter, QBrush
+from PyQt5.QtGui import QColor, QPainter, QBrush, QPalette
 from PyQt5.QtCore import Qt
 import sys
 import copy
 import numpy as np
 from test import Predict
+import cv2
 
 __appname__ = 'MnistRec'
 
@@ -18,6 +19,10 @@ class PaintCanvas(QWidget):
 		self.tempPoints = []
 		self.setFixedSize(28, 28)
 		self.bDrawing = False
+		pal = QPalette(self.palette())
+		pal.setColor(QPalette.Background, Qt.white)
+		self.setAutoFillBackground(True);
+		self.setPalette(pal)
 
 	def paintForEvent(self, ev):
 		pos = ev.pos()
@@ -88,8 +93,15 @@ class MnistRecQtMain(QMainWindow):
 	def recognize(self):
 		img = np.ones((28, 28))
 		for points in self.paintCanvas.pointsList:
-			for point in points:
-				img[point[0], point[1]] = 0
+			# 只是根据点画粗度为1的线
+			# for point in points:
+			# 	if point[0] < 28 and point[1] < 28:
+			# 		img[point[0], point[1]] = 0
+			# 根据鼠标模拟出粗度为3的笔画的图形
+			# 先去除不合图片要求的点
+			points = [point for point in points if point[0] < 28 and point[1] < 28]
+			for i in range(len(points)-1):
+				img = cv2.line(img, points[i], points[i+1], (0, 0, 0), 3)
 		img = np.reshape(img, (28, 28, 1))
 		self.digitLabel.setText(str(self.predict.predict_img(img)))
 
